@@ -61,6 +61,7 @@ jobs:
           output: sbom.cdx.json
 
       - name: Upload SBOM to Dependency-Track
+        shell: bash
         run: |
           curl -sf -X POST "${{ vars.DTRACK_URL }}/api/v1/bom" \
             -H "X-Api-Key: ${{ secrets.DTRACK_API_KEY }}" \
