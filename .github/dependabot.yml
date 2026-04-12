@@ -1,24 +1,12 @@
 version: 2
 updates:
-  - package-ecosystem: npm
-    directory: /
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: weekly
-      day: monday
+      interval: "weekly"
     open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-    groups:
-      patch-updates:
-        update-types:
-          - "patch"
-      minor-updates:
-        update-types:
-          - "minor"
 
-  - package-ecosystem: github-actions
-    directory: /
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: weekly
-    labels:
-      - "ci"
+      interval: "weekly"
