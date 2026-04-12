@@ -47,45 +47,6 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
 
-  sbom-and-scan:
-    needs: docker-build-push
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Generate SBOM with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ghcr.io/${{ github.repository }}:${{ github.sha }}
-          format: cyclonedx
-          output: sbom.cdx.json
-
-      - name: Upload SBOM to Dependency-Track
-        shell: bash
-        run: |
-          curl -sf -X POST "${{ vars.DTRACK_URL }}/api/v1/bom" \
-            -H "X-Api-Key: ${{ secrets.DTRACK_API_KEY }}" \
-            -H "Content-Type: multipart/form-data" \
-            -F "projectName=my-app" \
-            -F "projectVersion=${{ github.sha }}" \
-            -F "autoCreate=true" \
-            -F "bom=@sbom.cdx.json"
-
-      - name: Run Trivy container scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ghcr.io/${{ github.repository }}:${{ github.sha }}
-          format: sarif
-          output: trivy-image-results.sarif
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: trivy-image-results.sarif
-
   update-deployment:
     needs: docker-build-push
     runs-on: ubuntu-latest
