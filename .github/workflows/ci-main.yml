@@ -61,15 +61,10 @@ jobs:
           output: sbom.cdx.json
 
       - name: Upload SBOM to Dependency-Track
-        if: ${{ vars.DTRACK_URL != '' && env.DTRACK_API_KEY != '' }}
-        env:
-          DTRACK_API_KEY: ${{ secrets.DTRACK_API_KEY }}
-        shell: bash
         run: |
-          test -n "$DTRACK_API_KEY"
-          test -f sbom.cdx.json
-          curl --fail --show-error -X POST "${{ vars.DTRACK_URL }}/api/v1/bom" \
-            -H "X-Api-Key: $DTRACK_API_KEY" \
+          curl -sf -X POST "${{ vars.DTRACK_URL }}/api/v1/bom" \
+            -H "X-Api-Key: ${{ secrets.DTRACK_API_KEY }}" \
+            -H "Content-Type: multipart/form-data" \
             -F "projectName=my-app" \
             -F "projectVersion=${{ github.sha }}" \
             -F "autoCreate=true" \
@@ -86,7 +81,7 @@ jobs:
 
       - name: Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
-        if: ${{ always() && hashFiles('trivy-image-results.sarif') != '' }}
+        if: always()
         with:
           sarif_file: trivy-image-results.sarif
 
