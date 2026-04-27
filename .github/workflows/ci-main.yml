@@ -66,24 +66,14 @@ jobs:
           DTRACK_API_KEY: ${{ secrets.DTRACK_API_KEY }}
         shell: bash
         run: |
-          echo "DTRACK_URL=${{ vars.DTRACK_URL }}"
-          if [ -n "$DTRACK_API_KEY" ]; then
-            echo "DTRACK_API_KEY is set"
-          else
-            echo "DTRACK_API_KEY is EMPTY"
-            exit 1
-          fi
-          curl -i "${{ vars.DTRACK_URL }}/api/version" || true
-          ls -la
+          test -n "$DTRACK_API_KEY"
           test -f sbom.cdx.json
-          curl -v -o dtrack-response.txt -w "HTTP=%{http_code}\n" -X PUT "${{ vars.DTRACK_URL }}/api/v1/bom" \
+          curl --fail --show-error -X POST "${{ vars.DTRACK_URL }}/api/v1/bom" \
             -H "X-Api-Key: $DTRACK_API_KEY" \
-            -H "Content-Type: multipart/form-data" \
             -F "projectName=my-app" \
             -F "projectVersion=${{ github.sha }}" \
             -F "autoCreate=true" \
             -F "bom=@sbom.cdx.json"
-          cat dtrack-response.txt || true
 
       - name: Run Trivy container scan
         uses: aquasecurity/trivy-action@master
