@@ -6,10 +6,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
-  security-events: write
-  id-token: write
-  attestations: write
 
 jobs:
   build-and-test:
@@ -32,6 +28,11 @@ jobs:
   docker-build-sign:
     needs: build-and-test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v6
 
@@ -81,6 +82,9 @@ jobs:
   docker-build-push:
     needs: build-and-test
     runs-on: self-hosted
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -101,6 +105,9 @@ jobs:
   sbom-and-scan:
     needs: docker-build-push
     runs-on: self-hosted
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -140,6 +147,8 @@ jobs:
   update-deployment:
     needs: docker-build-push
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout deployment repo
         uses: actions/checkout@v4
